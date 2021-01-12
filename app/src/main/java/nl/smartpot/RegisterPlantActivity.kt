@@ -3,11 +3,13 @@ package nl.smartpot
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.crystal.crystalrangeseekbar.interfaces.OnRangeSeekbarChangeListener
+import com.crystal.crystalrangeseekbar.widgets.CrystalRangeSeekbar
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
@@ -20,6 +22,24 @@ class RegisterPlantActivity : AppCompatActivity() {
     private lateinit var addPlantButton: Button
     private lateinit var auth: FirebaseAuth
 
+    private lateinit var tempRange: CrystalRangeSeekbar
+    private lateinit var tempRangeMin: TextView
+    private lateinit var tempRangeMax: TextView
+    private var tempRangeMinValue: Number = 0
+    private var tempRangeMaxValue: Number = 100
+
+    private lateinit var lightRange: CrystalRangeSeekbar
+    private lateinit var lightRangeMin: TextView
+    private lateinit var lightRangeMax: TextView
+    private var lightRangeMinValue: Number = 5000
+    private var lightRangeMaxValue: Number = 30000
+
+    private lateinit var moistureRange: CrystalRangeSeekbar
+    private lateinit var moistureRangeMin: TextView
+    private lateinit var moistureRangeMax: TextView
+    private var moistureRangeMinValue: Number = 0
+    private var moistureRangeMaxValue: Number = 1024
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register_plant)
@@ -28,6 +48,18 @@ class RegisterPlantActivity : AppCompatActivity() {
         plantId = findViewById(R.id.plant_id)
         addPlantButton = findViewById(R.id.add_plant)
         auth = FirebaseAuth.getInstance()
+
+        tempRange = findViewById(R.id.tempRange)
+        tempRangeMin = findViewById(R.id.tempRangeMin)
+        tempRangeMax = findViewById(R.id.tempRangeMax)
+
+        lightRange = findViewById(R.id.lightRange)
+        lightRangeMin = findViewById(R.id.lightRangeMin)
+        lightRangeMax = findViewById(R.id.lightRangeMax)
+
+        moistureRange = findViewById(R.id.moistureRange)
+        moistureRangeMin = findViewById(R.id.moistureRangeMin)
+        moistureRangeMax = findViewById(R.id.moistureRangeMax)
 
         addPlantButton.setOnClickListener {
             var plantId: String = plantId.text.toString()
@@ -43,12 +75,12 @@ class RegisterPlantActivity : AppCompatActivity() {
                     val data = hashMapOf(
                             "userId" to auth.currentUser!!.uid,
                             "plantId" to plantId,
-                            "minLightIntensity" to 100,
-                            "maxLightIntensity" to 500,
-                            "minSoilMoisture" to 100,
-                            "maxSoilMoisture" to 500,
-                            "minTemperature" to 100,
-                            "maxTemperature" to 500
+                            "minLightIntensity" to lightRangeMinValue,
+                            "maxLightIntensity" to lightRangeMaxValue,
+                            "minSoilMoisture" to moistureRangeMinValue,
+                            "maxSoilMoisture" to moistureRangeMaxValue,
+                            "minTemperature" to tempRangeMinValue,
+                            "maxTemperature" to tempRangeMaxValue
                     )
 
                     functions
@@ -77,5 +109,27 @@ class RegisterPlantActivity : AppCompatActivity() {
 
             }
         }
+
+        tempRange.setOnRangeSeekbarChangeListener(OnRangeSeekbarChangeListener { minValue, maxValue ->
+            tempRangeMinValue = minValue
+            tempRangeMaxValue = maxValue
+            tempRangeMin.setText("$minValue°")
+            tempRangeMax.setText("$maxValue°")
+        })
+
+        lightRange.setOnRangeSeekbarChangeListener(OnRangeSeekbarChangeListener { minValue, maxValue ->
+            lightRangeMinValue = minValue
+            lightRangeMaxValue = maxValue
+            lightRangeMin.setText("$minValue lux")
+            lightRangeMax.setText("$maxValue lux")
+        })
+
+        moistureRange.setOnRangeSeekbarChangeListener(OnRangeSeekbarChangeListener { minValue, maxValue ->
+            moistureRangeMinValue = minValue
+            moistureRangeMaxValue = maxValue
+            moistureRangeMin.setText("$minValue")
+            moistureRangeMax.setText("$maxValue")
+        })
+
     }
 }
