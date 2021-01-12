@@ -25,17 +25,151 @@
                 android:id="@+id/plant_id"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="Plant id"/>
+                android:hint="Plant id" />
 
         </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/target_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="30px"
+            android:text="Target degrees:" />
+
+        <com.crystal.crystalrangeseekbar.widgets.CrystalRangeSeekbar
+            android:id="@+id/tempRange"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bar_color="#8990C4"
+            app:bar_highlight_color="#2434AD"
+            app:corner_radius="10"
+            app:data_type="_integer"
+            app:gap="10"
+            app:left_thumb_color="#1A246D"
+            app:left_thumb_color_pressed="#030B47"
+            app:max_value="100"
+            app:min_value="0"
+            app:right_thumb_color="#1A246D"
+            app:right_thumb_color_pressed="#030B47" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/tempRangeMin"
+                android:layout_width="33dp"
+                android:layout_height="wrap_content"
+                android:text="0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tempRangeMax"
+                android:layout_width="31dp"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textAlignment="textEnd"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/target_text2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="30px"
+            android:text="Target light intensity:" />
+
+        <com.crystal.crystalrangeseekbar.widgets.CrystalRangeSeekbar
+            android:id="@+id/lightRange"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bar_color="#8990C4"
+            app:bar_highlight_color="#2434AD"
+            app:corner_radius="10"
+            app:data_type="_integer"
+            app:gap="500"
+            app:left_thumb_color="#1A246D"
+            app:left_thumb_color_pressed="#030B47"
+            app:max_value="30000"
+            app:min_value="5000"
+            app:right_thumb_color="#1A246D"
+            app:right_thumb_color_pressed="#030B47" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/lightRangeMin"
+                android:layout_width="71dp"
+                android:layout_height="19dp"
+                android:text="0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/lightRangeMax"
+                android:layout_width="76dp"
+                android:layout_height="19dp"
+                android:text="0"
+                android:textAlignment="textEnd"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/target_text3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="30px"
+            android:text="Target moisture:" />
+
+        <com.crystal.crystalrangeseekbar.widgets.CrystalRangeSeekbar
+            android:id="@+id/moistureRange"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:bar_color="#8990C4"
+            app:bar_highlight_color="#2434AD"
+            app:corner_radius="10"
+            app:data_type="_integer"
+            app:gap="20"
+            app:left_thumb_color="#1A246D"
+            app:left_thumb_color_pressed="#030B47"
+            app:max_value="1024"
+            app:min_value="0"
+            app:right_thumb_color="#1A246D"
+            app:right_thumb_color_pressed="#030B47" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/moistureRangeMin"
+                android:layout_width="71dp"
+                android:layout_height="19dp"
+                android:text="0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/moistureRangeMax"
+                android:layout_width="76dp"
+                android:layout_height="19dp"
+                android:text="0"
+                android:textAlignment="textEnd"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <Button
             android:id="@+id/add_plant"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="32dp"
-            android:text="Add plant"/>
-
+            android:text="Add plant" />
 
 
     </LinearLayout>
