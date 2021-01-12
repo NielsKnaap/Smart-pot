@@ -25,20 +25,20 @@ class RegisterPlantActivity : AppCompatActivity() {
         setContentView(R.layout.activity_register_plant)
 
         functions = FirebaseFunctions.getInstance()
-        plantId  = findViewById(R.id.plant_id)
+        plantId = findViewById(R.id.plant_id)
         addPlantButton = findViewById(R.id.add_plant)
         auth = FirebaseAuth.getInstance()
 
-        addPlantButton.setOnClickListener{
+        addPlantButton.setOnClickListener {
             var plantId: String = plantId.text.toString()
             if (TextUtils.isEmpty(plantId)) {
                 Toast.makeText(this, "Please enter plantId", Toast.LENGTH_LONG).show()
             } else {
-                if(auth.currentUser == null){
+                if (auth.currentUser == null) {
                     val intent = Intent(this, LoginActivity::class.java)
                     startActivity(intent)
                     finish()
-                }else {
+                } else {
                     // Plant id is entered
                     val data = hashMapOf(
                             "userId" to auth.currentUser!!.uid,
