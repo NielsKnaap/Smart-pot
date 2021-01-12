@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity() {
@@ -12,6 +13,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var logoutBtn: Button
     private lateinit var updatePass: Button
+    private lateinit var addPlantBtn: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +41,11 @@ class MainActivity : AppCompatActivity() {
 
         updatePass.setOnClickListener{
             val intent = Intent(this, UpdatePasswordActivity::class.java)
+            startActivity(intent)
+        }
+
+        findViewById<FloatingActionButton>(R.id.add_plant_btn).setOnClickListener {
+            val intent = Intent(this, RegisterPlantActivity::class.java)
             startActivity(intent)
         }
     }
