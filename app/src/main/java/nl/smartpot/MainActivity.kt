@@ -58,25 +58,45 @@ class MainActivity : AppCompatActivity() {
                 .getHttpsCallable("callableGetPlants")
                 .call(data)
                 .continueWith { task ->
-                    val result = task.result?.data
+                    val result: ArrayList<HashMap<String, String>> = task.result?.data as ArrayList<HashMap<String, String>>
+                    result.forEach { item ->
+                        plantList.add(item["plantId"].toString())
+                    }
+                    Log.d("plantData", plantList.toString())
+                    displayList.addAll(plantList)
+
+                    recyclerView = findViewById(R.id.recyclerview)
+                    recyclerAdapter = RecyclerAdapter(displayList)
+                    recyclerView.adapter = recyclerAdapter
+
                     result
                 }
-
-        // TODO: Change this array to the dynamic result of the Google Cloud Function
-        plantList.add("test1")
-        plantList.add("test2")
-        plantList.add("test3")
-        plantList.add("test4")
-
-        displayList.addAll(plantList)
-        recyclerView = findViewById(R.id.recyclerview)
-        recyclerAdapter = RecyclerAdapter(displayList)
-
-        recyclerView.adapter = recyclerAdapter
 
         findViewById<FloatingActionButton>(R.id.add_plant_btn).setOnClickListener {
             val intent = Intent(this, RegisterPlantActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val data = hashMapOf(
+                "userId" to auth.currentUser!!.uid
+        )
+        functions
+                .getHttpsCallable("callableGetPlants")
+                .call(data)
+                .continueWith { task ->
+                    val result: ArrayList<HashMap<String, String>> = task.result?.data as ArrayList<HashMap<String, String>>
+                    displayList.clear()
+                    result.forEach { item ->
+                        displayList.add(item["plantId"].toString())
+                    }
+                    Log.d("plantDataRenew", plantList.toString())
+                    recyclerView.adapter!!.notifyDataSetChanged()
+
+                    result
+                }
     }
 }

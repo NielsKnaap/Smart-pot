@@ -3,6 +3,7 @@ package nl.smartpot
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -87,11 +88,7 @@ class RegisterPlantActivity : AppCompatActivity() {
                             .getHttpsCallable("callableAddPlant")
                             .call(data)
                             .continueWith { task ->
-                                // This continuation runs on either success or failure, but if the task
-                                // has failed then result will throw an Exception which will be
-                                // propagated down.
                                 val result = task.result?.data as String
-                                println(result)
                                 result
                             }
                             .addOnCompleteListener(OnCompleteListener { task ->
@@ -100,10 +97,10 @@ class RegisterPlantActivity : AppCompatActivity() {
                                     if (e is FirebaseFunctionsException) {
                                         val code = e.code
                                         val details = e.details
-                                        println(code)
-                                        println(e)
+                                        //TODO: Show user feedback
                                     }
                                 }
+                                finish()
                             })
                 }
 
