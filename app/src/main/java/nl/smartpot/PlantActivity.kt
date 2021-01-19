@@ -1,18 +1,23 @@
 package nl.smartpot
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartType
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
 import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStyle
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class PlantActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
@@ -24,6 +29,7 @@ class PlantActivity : AppCompatActivity() {
     private var temperature = mutableListOf<Any>()
     private var soilMoisture = mutableListOf<Any>()
     private var lightIntensity = mutableListOf<Any>()
+    private var inputTime = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +76,7 @@ class PlantActivity : AppCompatActivity() {
         }
     }
 
-    private fun getGraphData(data: HashMap<String, String?>, aaChartModel:AAChartModel, aaChartView: AAChartView){
+    private fun getGraphData(data: HashMap<String, String?>, aaChartModel: AAChartModel, aaChartView: AAChartView){
         functions
                 .getHttpsCallable("callableGetLastMeasurement")
                 .call(data)
@@ -80,6 +86,20 @@ class PlantActivity : AppCompatActivity() {
                         temperature.add(item["temperature"]!!)
                         soilMoisture.add(item["soilMoisture"]!!)
                         lightIntensity.add(item["lightIntensity"]!!)
+
+                        val timestamp = item["timeStamp"] as HashMap<*, *>
+                        val seconds = timestamp["_seconds"] as Int
+                        val nanoseconds = timestamp["_nanoseconds"] as Int
+
+                        val longseconds = seconds.toLong()
+                        val longnanoseconds = nanoseconds.toLong()
+
+                        val milliseconds = (longseconds * 1000) + (longnanoseconds / 1000000)
+                        val sdf = SimpleDateFormat("MM/dd/yyyy hh:mm")
+                        val netDate = Date(milliseconds)
+                        val date = sdf.format(netDate).toString()
+
+                        inputTime.add(date)
                     }
 
                     aaChartModel.series(arrayOf(
@@ -94,6 +114,8 @@ class PlantActivity : AppCompatActivity() {
                                     .data(lightIntensity.toTypedArray())
                     )
                     )
+
+                    aaChartModel.categories(inputTime.toTypedArray())
                     //The chart view object calls the instance object of AAChartModel and draws the final graphic
                     aaChartView.aa_drawChartWithChartModel(aaChartModel)
 
