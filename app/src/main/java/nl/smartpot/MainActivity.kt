@@ -13,6 +13,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.FirebaseFunctionsException
+import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
@@ -33,6 +34,21 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
         functions = FirebaseFunctions.getInstance()
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("GOOGLTOKEN", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            // Get new FCM registration token
+            val token = task.result
+
+            // Log and toast
+            val msg = token.toString()
+            Log.d("GOOGLETOKEN", msg)
+            Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+        })
 
         if(auth.currentUser == null){
             val intent = Intent(this, LoginActivity::class.java)
@@ -70,7 +86,7 @@ class MainActivity : AppCompatActivity() {
                     displayList.addAll(plantList)
 
                     recyclerView = findViewById(R.id.recyclerview)
-                    recyclerAdapter = RecyclerAdapter(displayList)
+                    recyclerAdapter = RecyclerAdapter(displayList, this)
                     recyclerView.adapter = recyclerAdapter
 
                     result
