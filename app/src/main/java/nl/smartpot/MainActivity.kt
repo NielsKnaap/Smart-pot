@@ -46,8 +46,19 @@ class MainActivity : AppCompatActivity() {
 
             // Log and toast
             val msg = token.toString()
-            Log.d("GOOGLETOKEN", msg)
-            Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+
+            val data = hashMapOf(
+                    "userId" to auth.currentUser!!.uid,
+                    "googleToken" to msg
+            )
+            functions
+                    .getHttpsCallable("addGoogleTokenToUser")
+                    .call(data)
+                    .continueWith { task ->
+                        val result: ArrayList<HashMap<String, String>> = task.result?.data as ArrayList<HashMap<String, String>>
+
+                        result
+                    }
         })
 
         if(auth.currentUser == null){
