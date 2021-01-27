@@ -3,18 +3,20 @@ package nl.smartpot
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.crystal.crystalrangeseekbar.interfaces.OnRangeSeekbarChangeListener
+import com.crystal.crystalrangeseekbar.interfaces.OnSeekbarChangeListener
 import com.crystal.crystalrangeseekbar.widgets.CrystalRangeSeekbar
+import com.crystal.crystalrangeseekbar.widgets.CrystalSeekbar
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.FirebaseFunctionsException
+import java.util.*
 
 
 class RegisterPlantActivity : AppCompatActivity() {
@@ -41,9 +43,16 @@ class RegisterPlantActivity : AppCompatActivity() {
     private var moistureRangeMinValue: Number = 0
     private var moistureRangeMaxValue: Number = 1024
 
+    private lateinit var measurementFrequencyRange: CrystalSeekbar
+    private lateinit var measurementFrequencyText: TextView
+    private var measurementFrequencyValue: Number = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register_plant)
+
+        val intent: Intent = getIntent();
+        val id: String? = intent.getStringExtra("id")
 
         functions = FirebaseFunctions.getInstance()
         plantId = findViewById(R.id.plant_id)
@@ -61,6 +70,9 @@ class RegisterPlantActivity : AppCompatActivity() {
         moistureRange = findViewById(R.id.moistureRange)
         moistureRangeMin = findViewById(R.id.moistureRangeMin)
         moistureRangeMax = findViewById(R.id.moistureRangeMax)
+
+        measurementFrequencyRange = findViewById(R.id.measureFrequencyBar)
+        measurementFrequencyText = findViewById(R.id.measureFrequencyText)
 
         addPlantButton.setOnClickListener {
             var plantId: String = plantId.text.toString()
@@ -81,11 +93,14 @@ class RegisterPlantActivity : AppCompatActivity() {
                             "minSoilMoisture" to moistureRangeMinValue,
                             "maxSoilMoisture" to moistureRangeMaxValue,
                             "minTemperature" to tempRangeMinValue,
-                            "maxTemperature" to tempRangeMaxValue
+                            "maxTemperature" to tempRangeMaxValue,
+                            "measureFrequency" to measurementFrequencyValue
                     )
 
+                    var function = if (id !== null) "callableEditPlant" else "callableAddPlant"
+
                     functions
-                            .getHttpsCallable("callableAddPlant")
+                            .getHttpsCallable(function)
                             .call(data)
                             .continueWith { task ->
                                 val result = task.result?.data as String
@@ -127,6 +142,56 @@ class RegisterPlantActivity : AppCompatActivity() {
             moistureRangeMin.setText("$minValue")
             moistureRangeMax.setText("$maxValue")
         })
+
+        measurementFrequencyRange.setOnSeekbarChangeListener(OnSeekbarChangeListener { minValue ->
+            measurementFrequencyText.setText(minValue.toString())
+            measurementFrequencyValue = minValue
+        })
+
+        if (id !== null) {
+            addPlantButton.setText("Update plant")
+            // Get the current values of the plant
+            Toast.makeText(this, "Edit mode", Toast.LENGTH_LONG).show()
+
+            val data = hashMapOf(
+                    "userId" to auth.currentUser!!.uid,
+                    "plantId" to id
+            )
+            functions
+                    .getHttpsCallable("callableGetPlant")
+                    .call(data)
+                    .continueWith { task ->
+                        val result: HashMap<String, Int> = task.result?.data as HashMap<String, Int>
+                        var maxTemperature = result["maxTemperature"]!!.toFloat()
+                        var minTemperature = result["minTemperature"]!!.toFloat()
+                        var maxSoilMoisture = result["maxSoilMoisture"]!!.toFloat()
+                        var minSoilMoisture = result["minSoilMoisture"]!!.toFloat()
+                        var minLightIntensity = result["minLightIntensity"]!!.toFloat()
+                        var maxLightIntensity = result["maxLightIntensity"]!!.toFloat()
+                        var measureFrequency = result["measureFrequency"]!!.toFloat()
+
+                        plantId.setText(id)
+                        plantId.isEnabled = false
+
+                        if(minSoilMoisture != 0.0F){
+                            moistureRange.setMinStartValue(minSoilMoisture).apply()
+                        }
+                        moistureRange.setMaxStartValue(maxSoilMoisture).apply()
+
+                        if(minTemperature != 0.0F){
+                            tempRange.setMinStartValue(minTemperature).apply()
+                        }
+                        tempRange.setMaxStartValue(maxTemperature).apply()
+
+                        if(minLightIntensity != 0.0F){
+                            lightRange.setMinStartValue(minLightIntensity).apply()
+                        }
+                        lightRange.setMaxStartValue(maxLightIntensity).apply()
+
+                        measurementFrequencyRange.setMinStartValue(measureFrequency).apply()
+
+                    }
+        }
 
     }
 }

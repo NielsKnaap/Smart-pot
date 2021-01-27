@@ -3,6 +3,7 @@ package nl.smartpot
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -13,6 +14,7 @@ import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAStyle
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
 import java.text.SimpleDateFormat
 import java.util.*
@@ -25,6 +27,7 @@ class PlantActivity : AppCompatActivity() {
 
     private lateinit var title: TextView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private lateinit var editButton: Button
 
     private var temperature = mutableListOf<Any>()
     private var soilMoisture = mutableListOf<Any>()
@@ -51,6 +54,7 @@ class PlantActivity : AppCompatActivity() {
         title = findViewById(R.id.titleView)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         title.setText(id)
+        editButton = findViewById(R.id.editButton)
 
         val aaChartView = findViewById<AAChartView>(R.id.aa_chart_view)
 
@@ -73,6 +77,13 @@ class PlantActivity : AppCompatActivity() {
         swipeRefreshLayout.setOnRefreshListener {
             this.getGraphData(data, aaChartModel, aaChartView)
             swipeRefreshLayout.isRefreshing = false
+        }
+
+        editButton.setOnClickListener{
+            val intent = Intent(this, RegisterPlantActivity::class.java)
+            intent.putExtra("id", id)
+            startActivity(intent)
+            finish()
         }
     }
 
