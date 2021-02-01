@@ -5,9 +5,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.Button
+import android.widget.CompoundButton
+import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartType
@@ -26,7 +27,10 @@ class PlantActivity : AppCompatActivity() {
     private lateinit var title: TextView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var editButton: Button
-    private lateinit var switch: SwitchCompat
+
+    private lateinit var switchTitle: TextView
+    private lateinit var switchRide: Switch
+
 
     private var temperature = mutableListOf<Any>()
     private var soilMoisture = mutableListOf<Any>()
@@ -57,8 +61,7 @@ class PlantActivity : AppCompatActivity() {
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         title.setText(id)
         editButton = findViewById(R.id.editButton)
-        switch = findViewById(R.id.switch2)
-        switch.setChecked(true)
+        switchRide = findViewById(R.id.switchRide)
 
         val aaChartView = findViewById<AAChartView>(R.id.aa_chart_view)
 
@@ -94,6 +97,45 @@ class PlantActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+
+        if (id != null) {
+            getMoveRobot(id)
+
+            switchRide.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked) {
+                    editMoveRobot(true, id)
+                }
+                else {
+                    editMoveRobot(false, id)
+                }
+            }
+        }
+    }
+
+    private fun getMoveRobot(plantId: String) {
+        val data = hashMapOf(
+                "userId" to auth.currentUser!!.uid,
+                "plantId" to plantId
+        )
+        functions
+                .getHttpsCallable("callableGetMoveRobot")
+                .call(data)
+                .continueWith { task ->
+                    val moveRobot: Boolean = task.result?.data as Boolean
+                    switchRide.setChecked(moveRobot)
+                }
+
+    }
+
+    private fun editMoveRobot(move: Boolean, plantId: String) {
+        val data = hashMapOf(
+                "userId" to auth.currentUser!!.uid,
+                "plantId" to plantId,
+                "moveRobot" to move
+        )
+        functions
+                .getHttpsCallable("callableEditMoveRobot")
+                .call(data)
     }
 
     public fun getGraphData(data: HashMap<String, String?>, aaChartModel: AAChartModel, aaChartView: AAChartView, init: Boolean = false){
