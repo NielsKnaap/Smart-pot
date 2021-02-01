@@ -20,6 +20,7 @@ import com.google.firebase.functions.FirebaseFunctions
 import java.text.SimpleDateFormat
 import java.util.*
 
+@Suppress("UNCHECKED_CAST")
 class PlantActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var functions: FirebaseFunctions
@@ -30,6 +31,14 @@ class PlantActivity : AppCompatActivity() {
 
     private lateinit var switchTitle: TextView
     private lateinit var switchRide: Switch
+
+    private lateinit var latestLightIntensity: TextView
+    private lateinit var latestTemperature: TextView
+    private lateinit var latestSoilMoisture: TextView
+
+    private lateinit var titleLightIntensity: TextView
+    private lateinit var titleTemperature: TextView
+    private lateinit var titleSoilMoisture: TextView
 
 
     private var temperature = mutableListOf<Any>()
@@ -47,7 +56,7 @@ class PlantActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         functions = FirebaseFunctions.getInstance()
 
-        val intent: Intent = getIntent();
+        val intent: Intent = intent
         val id: String? = intent.getStringExtra("id")
 
         if (id === null) {
@@ -57,11 +66,9 @@ class PlantActivity : AppCompatActivity() {
             finish()
         }
 
-        title = findViewById(R.id.titleView)
-        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
-        title.setText(id)
-        editButton = findViewById(R.id.editButton)
-        switchRide = findViewById(R.id.switchRide)
+        createVariables()
+        title.text = id
+
 
         val aaChartView = findViewById<AAChartView>(R.id.aa_chart_view)
 
@@ -99,6 +106,7 @@ class PlantActivity : AppCompatActivity() {
         }
 
         if (id != null) {
+            getLatestMeasurement(id)
             getMoveRobot(id)
 
             switchRide.setOnCheckedChangeListener { buttonView, isChecked ->
@@ -112,6 +120,40 @@ class PlantActivity : AppCompatActivity() {
         }
     }
 
+    private fun createVariables() {
+        title = findViewById(R.id.titleView)
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
+        editButton = findViewById(R.id.editButton)
+        switchRide = findViewById(R.id.switchRide)
+        latestLightIntensity = findViewById(R.id.latestLightIntensity)
+        latestTemperature = findViewById(R.id.latestTemperature)
+        latestSoilMoisture = findViewById(R.id.latestSoilMoisture)
+        titleLightIntensity = findViewById(R.id.titleLightIntensity)
+        titleTemperature = findViewById(R.id.titleTemperature)
+        titleSoilMoisture = findViewById(R.id.titleSoilMoisture)
+    }
+
+    private fun getLatestMeasurement(plantId: String) {
+        val data = hashMapOf(
+                "userId" to auth.currentUser!!.uid,
+                "plantId" to plantId,
+                "limit" to 1
+        )
+        functions
+                .getHttpsCallable("callableGetLastMeasurement")
+                .call(data)
+                .continueWith { task ->
+                    val result: ArrayList<HashMap<String, Any>> = task.result?.data as ArrayList<HashMap<String, Any>>
+                    val valLight = result[0]["lightIntensity"].toString() + "lux"
+                    val valSoil = result[0]["soilMoisture"].toString() + "%"
+                    val valTemp = result[0]["temperature"].toString() + "°C"
+                    latestLightIntensity.text = valLight
+                    latestSoilMoisture.text = valSoil
+                    latestTemperature.text = valTemp
+                }
+
+    }
+
     private fun getMoveRobot(plantId: String) {
         val data = hashMapOf(
                 "userId" to auth.currentUser!!.uid,
@@ -122,7 +164,7 @@ class PlantActivity : AppCompatActivity() {
                 .call(data)
                 .continueWith { task ->
                     val moveRobot: Boolean = task.result?.data as Boolean
-                    switchRide.setChecked(moveRobot)
+                    switchRide.isChecked = moveRobot
                 }
 
     }

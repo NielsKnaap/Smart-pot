@@ -9,11 +9,13 @@
 
     <TextView
         android:id="@+id/titleView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
-        android:layout_marginTop="48dp"
+        android:layout_width="189dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="44dp"
         android:text="TextView"
+        android:textSize="30sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -34,36 +36,119 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <Button
-        android:id="@+id/editButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="29dp"
-        android:text="Edit"
-        app:layout_constraintBottom_toTopOf="@+id/swipeRefreshLayout"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <Switch
-        android:id="@+id/switchRide"
-        android:layout_width="57dp"
-        android:layout_height="40dp"
-        app:layout_constraintBottom_toTopOf="@+id/editButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.954"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.944" />
-
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Rijden"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/switchRide"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.93"
+        app:layout_constraintHorizontal_bias="0.903"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/editButton"
+        android:layout_width="88dp"
+        android:layout_height="43dp"
+        android:layout_marginBottom="184dp"
+        android:text="Edit"
+        app:layout_constraintBottom_toTopOf="@+id/swipeRefreshLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.953"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Switch
+        android:id="@+id/switchRide"
+        android:layout_width="57dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/editButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.903"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/latestLightIntensity"
+        android:layout_width="100dp"
+        android:layout_height="30dp"
+        android:layout_marginBottom="56dp"
+        android:text="00"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/swipeRefreshLayout"
+        app:layout_constraintEnd_toStartOf="@+id/latestTemperature"
+        app:layout_constraintHorizontal_bias="0.36"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/latestTemperature"
+        android:layout_width="102dp"
+        android:layout_height="29dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="56dp"
+        android:text="00"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/swipeRefreshLayout"
+        app:layout_constraintEnd_toStartOf="@+id/latestSoilMoisture" />
+
+    <TextView
+        android:id="@+id/latestSoilMoisture"
+        android:layout_width="96dp"
+        android:layout_height="34dp"
+        android:layout_marginEnd="36dp"
+        android:layout_marginBottom="52dp"
+        android:text="00"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/swipeRefreshLayout"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/titleLightIntensity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="Lichtintensiteit"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/latestLightIntensity"
+        app:layout_constraintEnd_toStartOf="@+id/titleTemperature"
+        app:layout_constraintHorizontal_bias="0.338"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.973" />
+
+    <TextView
+        android:id="@+id/titleTemperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="36dp"
+        android:layout_marginBottom="20dp"
+        android:text="Temperatuur"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/latestTemperature"
+        app:layout_constraintEnd_toStartOf="@+id/titleSoilMoisture"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.973" />
+
+    <TextView
+        android:id="@+id/titleSoilMoisture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="20dp"
+        android:text="Bodemvochtigheid"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/latestSoilMoisture"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.977" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
