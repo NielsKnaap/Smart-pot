@@ -133,7 +133,7 @@ class PlantActivity : AppCompatActivity() {
         titleSoilMoisture = findViewById(R.id.titleSoilMoisture)
     }
 
-    private fun getLatestMeasurement(plantId: String) {
+    public fun getLatestMeasurement(plantId: String) {
         val data = hashMapOf(
                 "userId" to auth.currentUser!!.uid,
                 "plantId" to plantId,
@@ -209,19 +209,7 @@ class PlantActivity : AppCompatActivity() {
                     }
                     dateOfLastMeasurement = inputTimestamp.last()
 
-                    aaChartModel.series(arrayOf(
-                            AASeriesElement()
-                                    .name("Temperatuur")
-                                    .data(temperature.toTypedArray()),
-                            AASeriesElement()
-                                    .name("Vochtigheid")
-                                    .data(soilMoisture.toTypedArray()),
-                            AASeriesElement()
-                                    .name("Licht")
-                                    .data(lightIntensity.toTypedArray())
-                    )
-                    )
-                    var testsddd = arrayOf(
+                    var elements = arrayOf(
                             AASeriesElement()
                                     .name("Temperatuur")
                                     .data(temperature.toTypedArray()),
@@ -233,6 +221,8 @@ class PlantActivity : AppCompatActivity() {
                                     .data(lightIntensity.toTypedArray())
                     )
 
+                    aaChartModel.series(elements)
+
                     aaChartModel.categories(inputTime.toTypedArray())
                     //The chart view object calls the instance object of AAChartModel and draws the final graphic
                     if(init){
@@ -241,7 +231,7 @@ class PlantActivity : AppCompatActivity() {
                         val obj = MyRunnable(data, dateOfLastMeasurement, aaChartModel, aaChartView,this, mainHandler)
                         mainHandler.post(obj)
                     } else {
-                        aaChartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(testsddd)
+                        aaChartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(elements)
                     }
 
 
@@ -270,6 +260,7 @@ class MyRunnable: Runnable {
 
     override fun run() {
         plantActivity.getGraphData(data, aaChartModel, aaChartView, false)
+        plantActivity.getLatestMeasurement(data["plantId"]!!)
         mainHandler.postDelayed(this, 5000);
     }
 }

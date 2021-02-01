@@ -6,9 +6,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/card_view"
     android:layout_margin="5dp"
-    app:cardBackgroundColor="#FF7043"
+    app:cardBackgroundColor="#254E70"
     app:cardCornerRadius="5dp"
-    android:padding="5dp">
+    android:padding="10dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
