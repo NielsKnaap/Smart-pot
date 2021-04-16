@@ -56,10 +56,12 @@
         android:layout_height="43dp"
         android:layout_marginBottom="184dp"
         android:text="Edit"
+        android:textColor="#FFFFFF"
         app:layout_constraintBottom_toTopOf="@+id/swipeRefreshLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.953"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="@drawable/button"/>
 
     <Switch
         android:id="@+id/switchRide"

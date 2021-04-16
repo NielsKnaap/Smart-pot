@@ -183,6 +183,7 @@ class PlantActivity : AppCompatActivity() {
                 .call(data)
     }
 
+
     public fun getGraphData(data: HashMap<String, Any?>, aaChartModel: AAChartModel, aaChartView: AAChartView, init: Boolean = false){
         functions
                 .getHttpsCallable("callableGetLastMeasurement")

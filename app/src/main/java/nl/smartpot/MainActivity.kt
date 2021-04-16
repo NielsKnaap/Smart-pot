@@ -75,6 +75,12 @@ class MainActivity : AppCompatActivity() {
         updatePass = findViewById(R.id.update_pass_btn)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
 
+        updatePass.setOnClickListener{
+            val intent = Intent(this, UpdatePasswordActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
         logoutBtn.setOnClickListener{
             FirebaseAuth.getInstance().signOut()
             val intent = Intent(this, LoginActivity::class.java)
