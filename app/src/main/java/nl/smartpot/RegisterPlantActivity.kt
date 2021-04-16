@@ -55,11 +55,13 @@ class RegisterPlantActivity : AppCompatActivity() {
 
         val intent: Intent = getIntent();
         val id: String? = intent.getStringExtra("id")
-        System.out.println("ZIE DIT " + id)
+
+        addPlantListener(id)
+        setRegistrySliders()
 
         if (id !== null) {
-            addPlantListener(id)
-            setRegistrySliders()
+            addPlantButton.setText("Update plant")
+            Toast.makeText(this, "Edit mode", Toast.LENGTH_LONG).show()
 
             val data = hashMapOf<String, String>(
                     "userId" to auth.currentUser!!.uid,
@@ -90,10 +92,6 @@ class RegisterPlantActivity : AppCompatActivity() {
 
         measurementFrequencyRange = findViewById(R.id.measureFrequencyBar)
         measurementFrequencyText = findViewById(R.id.measureFrequencyText)
-
-        addPlantButton.setText("Update plant")
-
-        Toast.makeText(this, "Edit mode", Toast.LENGTH_LONG).show()
     }
 
     private fun setRegistrySliders() {
@@ -124,7 +122,7 @@ class RegisterPlantActivity : AppCompatActivity() {
         })
     }
 
-    private fun addPlantListener(id: String) {
+    private fun addPlantListener(id: String?) {
         addPlantButton.setOnClickListener {
             var plantId: String = plantId.text.toString()
             if (TextUtils.isEmpty(plantId)) {
@@ -136,7 +134,8 @@ class RegisterPlantActivity : AppCompatActivity() {
                     finish()
                 } else {
                     val data = createPlantRegistryHashMap()
-                    registerPlantFB(id, data)
+                    var function = if (id !== null) "callableEditPlant" else "callableAddPlant"
+                    registerPlantFB(function, data)
                 }
             }
         }
@@ -155,8 +154,7 @@ class RegisterPlantActivity : AppCompatActivity() {
                 "measureFrequency" to measurementFrequencyValue)
     }
 
-    private fun registerPlantFB(id: String, data: HashMap<String, Any>) {
-        var function = if (id !== null) "callableEditPlant" else "callableAddPlant"
+    private fun registerPlantFB(function: String, data: HashMap<String, Any>) {
 
         functions
                 .getHttpsCallable(function)
