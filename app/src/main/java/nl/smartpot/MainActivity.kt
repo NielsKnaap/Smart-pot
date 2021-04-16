@@ -12,7 +12,6 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
-import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : AppCompatActivity() {
@@ -32,94 +31,22 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        auth = FirebaseAuth.getInstance()
-        functions = FirebaseFunctions.getInstance()
 
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w("GOOGLTOKEN", "Fetching FCM registration token failed", task.exception)
-                return@OnCompleteListener
-            }
-
-            // Get new FCM registration token
-            val token = task.result
-
-            // Log and toast
-            val msg = token.toString()
-
-            val data = hashMapOf(
-                    "userId" to auth.currentUser!!.uid,
-                    "googleToken" to msg
-            )
-            functions
-                    .getHttpsCallable("addGoogleTokenToUser")
-                    .call(data)
-                    .continueWith { task ->
-                        val result: ArrayList<HashMap<String, String>> = task.result?.data as ArrayList<HashMap<String, String>>
-
-                        result
-                    }
-        })
-
-        if(auth.currentUser == null){
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish()
-        }else{
-            Toast.makeText(this, "Already logged in", Toast.LENGTH_LONG).show()
-        }
+        getFirebaseInstances()
+        addGoogleTokenToUser()
+        checkIfUserLoggedIn()
 
         setContentView(R.layout.activity_main)
+        setActivityVariables()
 
-        logoutBtn = findViewById(R.id.logout_btn)
-        updatePass = findViewById(R.id.update_pass_btn)
-        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
+        setLoginListeners()
 
-        updatePass.setOnClickListener{
-            val intent = Intent(this, UpdatePasswordActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-
-        logoutBtn.setOnClickListener{
-            FirebaseAuth.getInstance().signOut()
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-
-        val data = hashMapOf(
+        val userData = hashMapOf(
                 "userId" to auth.currentUser!!.uid
         )
-        functions
-                .getHttpsCallable("callableGetPlants")
-                .call(data)
-                .continueWith { task ->
-                    val result: ArrayList<HashMap<String, String>> = task.result?.data as ArrayList<HashMap<String, String>>
-                    result.forEach { item ->
-                        plantList.add(item["plantId"].toString())
-                    }
-                    Log.d("plantData", plantList.toString())
-                    displayList.addAll(plantList)
+        getPlantsFB(userData)
 
-                    recyclerView = findViewById(R.id.recyclerview)
-                    recyclerAdapter = RecyclerAdapter(displayList, this)
-                    recyclerView.adapter = recyclerAdapter
-
-                    result
-                }
-
-        findViewById<FloatingActionButton>(R.id.add_plant_btn).setOnClickListener {
-            val intent = Intent(this, RegisterPlantActivity::class.java)
-            startActivity(intent)
-        }
-
-        swipeRefreshLayout.setOnRefreshListener {
-            val data = hashMapOf(
-                    "userId" to auth.currentUser!!.uid
-            )
-            this.updatePlants(data, true)
-        }
+        setOtherListeners()
 
     }
 
@@ -150,5 +77,107 @@ class MainActivity : AppCompatActivity() {
 
                     result
                 }
+    }
+
+    private fun getFirebaseInstances() {
+        auth = FirebaseAuth.getInstance()
+        functions = FirebaseFunctions.getInstance()
+    }
+
+    private fun addGoogleTokenToUserFB(data: HashMap<String, String>) {
+        functions
+                .getHttpsCallable("addGoogleTokenToUser")
+                .call(data)
+                .continueWith { task ->
+                    val result: ArrayList<HashMap<String, String>> = task.result?.data as ArrayList<HashMap<String, String>>
+
+                    result
+                }
+    }
+
+    private fun addGoogleTokenToUser() {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("GOOGLTOKEN", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            // Get new FCM registration token
+            val token = task.result
+
+            // Log and toast
+            val msg = token.toString()
+
+            val data = hashMapOf(
+                    "userId" to auth.currentUser!!.uid,
+                    "googleToken" to msg
+            )
+            addGoogleTokenToUserFB(data)
+        })
+    }
+
+    private fun checkIfUserLoggedIn() {
+        if(auth.currentUser == null){
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        } else{
+            Toast.makeText(this, "Already logged in", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun setActivityVariables() {
+        logoutBtn = findViewById(R.id.logout_btn)
+        updatePass = findViewById(R.id.update_pass_btn)
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
+    }
+
+    private fun getPlantsFB(data : HashMap<String, String>) {
+        functions
+                .getHttpsCallable("callableGetPlants")
+                .call(data)
+                .continueWith { task ->
+                    val result: ArrayList<HashMap<String, String>> = task.result?.data as ArrayList<HashMap<String, String>>
+                    result.forEach { item ->
+                        plantList.add(item["plantId"].toString())
+                    }
+                    Log.d("plantData", plantList.toString())
+                    displayList.addAll(plantList)
+
+                    recyclerView = findViewById(R.id.recyclerview)
+                    recyclerAdapter = RecyclerAdapter(displayList, this)
+                    recyclerView.adapter = recyclerAdapter
+
+                    result
+                }
+    }
+
+    private fun setLoginListeners() {
+        updatePass.setOnClickListener{
+            val intent = Intent(this, UpdatePasswordActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
+        logoutBtn.setOnClickListener{
+            FirebaseAuth.getInstance().signOut()
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+    }
+
+    private fun setOtherListeners() {
+        findViewById<FloatingActionButton>(R.id.add_plant_btn).setOnClickListener {
+            val intent = Intent(this, RegisterPlantActivity::class.java)
+            startActivity(intent)
+        }
+
+        swipeRefreshLayout.setOnRefreshListener {
+            val data = hashMapOf(
+                    "userId" to auth.currentUser!!.uid
+            )
+            this.updatePlants(data, true)
+        }
     }
 }
