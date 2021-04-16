@@ -85,14 +85,16 @@ class PlantActivity : AppCompatActivity() {
 
         val data = hashMapOf(
                 "userId" to auth.currentUser!!.uid,
-                "plantId" to id
+                "plantId" to id,
+                "period" to 100
         )
         this.getGraphData(data, aaChartModel, aaChartView, true)
         swipeRefreshLayout.setOnRefreshListener {
             val newdata = hashMapOf(
                     "userId" to auth.currentUser!!.uid,
                     "plantId" to id,
-                    "lastDate" to dateOfLastMeasurement
+                    "lastDate" to dateOfLastMeasurement,
+                    "period" to 100
             )
             this.getGraphData(newdata, aaChartModel, aaChartView, false)
             swipeRefreshLayout.isRefreshing = false
@@ -137,7 +139,8 @@ class PlantActivity : AppCompatActivity() {
         val data = hashMapOf(
                 "userId" to auth.currentUser!!.uid,
                 "plantId" to plantId,
-                "limit" to 1
+                "limit" to 1,
+                "period" to 100
         )
         functions
                 .getHttpsCallable("callableGetLastMeasurement")
@@ -180,7 +183,8 @@ class PlantActivity : AppCompatActivity() {
                 .call(data)
     }
 
-    public fun getGraphData(data: HashMap<String, String?>, aaChartModel: AAChartModel, aaChartView: AAChartView, init: Boolean = false){
+
+    public fun getGraphData(data: HashMap<String, Any?>, aaChartModel: AAChartModel, aaChartView: AAChartView, init: Boolean = false){
         functions
                 .getHttpsCallable("callableGetLastMeasurement")
                 .call(data)
@@ -240,14 +244,14 @@ class PlantActivity : AppCompatActivity() {
     }
 }
 class MyRunnable: Runnable {
-    private lateinit var data: HashMap<String, String?>
+    private lateinit var data: HashMap<String, Any?>
     private lateinit var aaChartModel: AAChartModel
     private lateinit var aaChartView: AAChartView
     private lateinit var plantActivity: PlantActivity
     private lateinit var mainHandler: Handler
     private lateinit var dateOfLastMeasurement: String
 
-    constructor(data: HashMap<String, String?>, dateOfLastMeasurement: String,aaChartModel: AAChartModel, aaChartView: AAChartView, plantActivity: PlantActivity, mainHandler: Handler) {
+    constructor(data: HashMap<String, Any?>, dateOfLastMeasurement: String,aaChartModel: AAChartModel, aaChartView: AAChartView, plantActivity: PlantActivity, mainHandler: Handler) {
         this.data = data
         this.aaChartModel = aaChartModel
         this.aaChartView = aaChartView
@@ -260,7 +264,7 @@ class MyRunnable: Runnable {
 
     override fun run() {
         plantActivity.getGraphData(data, aaChartModel, aaChartView, false)
-        plantActivity.getLatestMeasurement(data["plantId"]!!)
+        plantActivity.getLatestMeasurement(data["plantId"] as String)
         mainHandler.postDelayed(this, 5000);
     }
 }
