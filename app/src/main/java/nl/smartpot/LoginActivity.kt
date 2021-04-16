@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
+import android.text.method.PasswordTransformationMethod
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -26,15 +27,39 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        setActivityVariables()
+
+        auth = FirebaseAuth.getInstance()
+
+        setLoginListener()
+        setOtherListeners()
+    }
+
+    private fun setActivityVariables() {
         emailEt = findViewById(R.id.email_edt_text)
         passwordEt = findViewById(R.id.pass_edt_text)
+        passwordEt.transformationMethod = PasswordTransformationMethod.getInstance();
 
         signupBtn = findViewById(R.id.signup_btn)
         loginBtn = findViewById(R.id.login_btn)
 
         resetPasswordTv = findViewById(R.id.reset_pass_tv)
+    }
 
-        auth = FirebaseAuth.getInstance()
+    private fun setOtherListeners() {
+        signupBtn.setOnClickListener {
+            val intent = Intent(this, SignupActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
+        resetPasswordTv.setOnClickListener {
+            val intent = Intent(this, ForgotPasswordActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    private fun setLoginListener() {
 
         loginBtn.setOnClickListener {
             var email: String = emailEt.text.toString()
@@ -54,17 +79,6 @@ class LoginActivity : AppCompatActivity() {
                     }
                 })
             }
-        }
-
-        signupBtn.setOnClickListener {
-            val intent = Intent(this, SignupActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-
-        resetPasswordTv.setOnClickListener {
-            val intent = Intent(this, ForgotPasswordActivity::class.java)
-            startActivity(intent)
         }
     }
 }
