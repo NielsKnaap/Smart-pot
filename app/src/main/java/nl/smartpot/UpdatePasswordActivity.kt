@@ -1,5 +1,6 @@
 package nl.smartpot
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
@@ -29,6 +30,8 @@ class UpdatePasswordActivity : AppCompatActivity() {
         back = findViewById(R.id.back_btn)
 
         back.setOnClickListener{
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
             finish()
         }
 
