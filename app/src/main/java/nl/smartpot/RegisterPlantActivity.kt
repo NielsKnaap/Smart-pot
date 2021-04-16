@@ -144,7 +144,7 @@ class RegisterPlantActivity : AppCompatActivity() {
     private fun createPlantRegistryHashMap(): HashMap<String, Any> {
         return hashMapOf(
                 "userId" to auth.currentUser!!.uid,
-                "plantId" to plantId,
+                "plantId" to plantId.text.toString(),
                 "minLightIntensity" to lightRangeMinValue,
                 "maxLightIntensity" to lightRangeMaxValue,
                 "minSoilMoisture" to moistureRangeMinValue,
