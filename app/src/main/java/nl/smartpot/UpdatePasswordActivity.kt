@@ -7,14 +7,12 @@ import android.text.TextUtils
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 
 class UpdatePasswordActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
 
     private lateinit var passwordEt: EditText
-
     private lateinit var changePasswordBtn: Button
     private lateinit var back: Button
 
@@ -24,11 +22,17 @@ class UpdatePasswordActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
-        passwordEt = findViewById(R.id.password_edt_text)
+        setActivityVariables()
+        setButtonListeners()
+    }
 
+    private fun setActivityVariables() {
+        passwordEt = findViewById(R.id.password_edt_text)
         changePasswordBtn = findViewById(R.id.reset_pass_btn)
         back = findViewById(R.id.back_btn)
+    }
 
+    private fun setButtonListeners() {
         back.setOnClickListener{
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
@@ -36,12 +40,12 @@ class UpdatePasswordActivity : AppCompatActivity() {
         }
 
         changePasswordBtn.setOnClickListener{
-            var password: String = passwordEt.text.toString()
+            val password: String = passwordEt.text.toString()
             if (TextUtils.isEmpty(password)) {
                 Toast.makeText(this, "Please enter password", Toast.LENGTH_LONG).show()
             } else {
                 auth.currentUser?.updatePassword(password)
-                        ?.addOnCompleteListener(this, OnCompleteListener { task ->
+                        ?.addOnCompleteListener(this) { task ->
                             if (task.isSuccessful) {
                                 Toast.makeText(this, "Password changes successfully", Toast.LENGTH_LONG)
                                         .show()
@@ -50,7 +54,7 @@ class UpdatePasswordActivity : AppCompatActivity() {
                                 Toast.makeText(this, "password not changed", Toast.LENGTH_LONG)
                                         .show()
                             }
-                        })
+                        }
             }
         }
     }

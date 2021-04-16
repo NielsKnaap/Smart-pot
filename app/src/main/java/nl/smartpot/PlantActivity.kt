@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.Button
-import android.widget.CompoundButton
 import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +19,6 @@ import com.google.firebase.functions.FirebaseFunctions
 import java.text.SimpleDateFormat
 import java.util.*
 
-@Suppress("UNCHECKED_CAST")
 class PlantActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var functions: FirebaseFunctions
@@ -111,7 +109,7 @@ class PlantActivity : AppCompatActivity() {
             getLatestMeasurement(id)
             getMoveRobot(id)
 
-            switchRide.setOnCheckedChangeListener { buttonView, isChecked ->
+            switchRide.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
                     editMoveRobot(true, id)
                 }
@@ -135,7 +133,7 @@ class PlantActivity : AppCompatActivity() {
         titleSoilMoisture = findViewById(R.id.titleSoilMoisture)
     }
 
-    public fun getLatestMeasurement(plantId: String) {
+    fun getLatestMeasurement(plantId: String) {
         val data = hashMapOf(
                 "userId" to auth.currentUser!!.uid,
                 "plantId" to plantId,
@@ -183,8 +181,7 @@ class PlantActivity : AppCompatActivity() {
                 .call(data)
     }
 
-
-    public fun getGraphData(data: HashMap<String, Any?>, aaChartModel: AAChartModel, aaChartView: AAChartView, init: Boolean = false){
+    fun getGraphData(data: HashMap<String, Any?>, aaChartModel: AAChartModel, aaChartView: AAChartView, init: Boolean = false){
         functions
                 .getHttpsCallable("callableGetLastMeasurement")
                 .call(data)
@@ -213,7 +210,7 @@ class PlantActivity : AppCompatActivity() {
                     }
                     dateOfLastMeasurement = inputTimestamp.last()
 
-                    var elements = arrayOf(
+                    val elements = arrayOf(
                             AASeriesElement()
                                     .name("Temperatuur")
                                     .data(temperature.toTypedArray()),
@@ -244,12 +241,12 @@ class PlantActivity : AppCompatActivity() {
     }
 }
 class MyRunnable: Runnable {
-    private lateinit var data: HashMap<String, Any?>
-    private lateinit var aaChartModel: AAChartModel
-    private lateinit var aaChartView: AAChartView
-    private lateinit var plantActivity: PlantActivity
-    private lateinit var mainHandler: Handler
-    private lateinit var dateOfLastMeasurement: String
+    private var data: HashMap<String, Any?>
+    private var aaChartModel: AAChartModel
+    private var aaChartView: AAChartView
+    private var plantActivity: PlantActivity
+    private var mainHandler: Handler
+    private var dateOfLastMeasurement: String
 
     constructor(data: HashMap<String, Any?>, dateOfLastMeasurement: String,aaChartModel: AAChartModel, aaChartView: AAChartView, plantActivity: PlantActivity, mainHandler: Handler) {
         this.data = data
@@ -259,12 +256,12 @@ class MyRunnable: Runnable {
         this.mainHandler = mainHandler
         this.dateOfLastMeasurement = dateOfLastMeasurement
 
-        this.data.put("lastDate", this.dateOfLastMeasurement)
+        this.data["lastDate"] = this.dateOfLastMeasurement
     }
 
     override fun run() {
         plantActivity.getGraphData(data, aaChartModel, aaChartView, false)
         plantActivity.getLatestMeasurement(data["plantId"] as String)
-        mainHandler.postDelayed(this, 5000);
+        mainHandler.postDelayed(this, 5000)
     }
 }

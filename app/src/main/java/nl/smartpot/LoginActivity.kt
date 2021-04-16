@@ -9,7 +9,6 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : AppCompatActivity() {
@@ -38,7 +37,7 @@ class LoginActivity : AppCompatActivity() {
     private fun setActivityVariables() {
         emailEt = findViewById(R.id.email_edt_text)
         passwordEt = findViewById(R.id.pass_edt_text)
-        passwordEt.transformationMethod = PasswordTransformationMethod.getInstance();
+        passwordEt.transformationMethod = PasswordTransformationMethod.getInstance()
 
         signupBtn = findViewById(R.id.signup_btn)
         loginBtn = findViewById(R.id.login_btn)
@@ -62,13 +61,13 @@ class LoginActivity : AppCompatActivity() {
     private fun setLoginListener() {
 
         loginBtn.setOnClickListener {
-            var email: String = emailEt.text.toString()
-            var password: String = passwordEt.text.toString()
+            val email: String = emailEt.text.toString()
+            val password: String = passwordEt.text.toString()
 
             if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
                 Toast.makeText(this@LoginActivity, "Please fill all the fields", Toast.LENGTH_LONG).show()
             } else {
-                auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, OnCompleteListener { task ->
+                auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
                         Toast.makeText(this, "Successfully Logged In", Toast.LENGTH_LONG).show()
                         val intent = Intent(this, MainActivity::class.java)
@@ -77,7 +76,7 @@ class LoginActivity : AppCompatActivity() {
                     } else {
                         Toast.makeText(this, "Login Failed", Toast.LENGTH_LONG).show()
                     }
-                })
+                }
             }
         }
     }

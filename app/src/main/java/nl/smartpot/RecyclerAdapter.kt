@@ -12,10 +12,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
 
-class RecyclerAdapter(plantList: MutableList<String>, context: Context): RecyclerView.Adapter<RecyclerAdapter.ViewHolder>() {
+class RecyclerAdapter(plantList: MutableList<String>, private var context: Context): RecyclerView.Adapter<RecyclerAdapter.ViewHolder>() {
 
     private var plants: MutableList<String> = plantList
-    private var context: Context = context
 
     private lateinit var auth: FirebaseAuth
     private lateinit var functions: FirebaseFunctions
@@ -51,14 +50,11 @@ class RecyclerAdapter(plantList: MutableList<String>, context: Context): Recycle
     }
 
     inner class ViewHolder(itemView: View, context: Context): RecyclerView.ViewHolder(itemView) {
-        var itemImage: ImageView
-        var itemTitle: TextView
-        var itemTemp: TextView
+        var itemImage: ImageView = itemView.findViewById(R.id.itemImage)
+        var itemTitle: TextView = itemView.findViewById(R.id.itemTitle)
+        var itemTemp: TextView = itemView.findViewById(R.id.itemTemp)
 
         init {
-            itemImage = itemView.findViewById(R.id.itemImage)
-            itemTitle = itemView.findViewById(R.id.itemTitle)
-            itemTemp = itemView.findViewById(R.id.itemTemp)
 
             itemView.setOnClickListener {
                 val position: Int = adapterPosition
