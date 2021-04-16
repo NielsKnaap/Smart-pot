@@ -2,7 +2,8 @@ package nl.smartpot
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.os.Handler
+import android.os.Looper
 import android.widget.Button
 import android.widget.CompoundButton
 import android.widget.Switch
@@ -18,8 +19,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 @Suppress("UNCHECKED_CAST")
 class PlantActivity : AppCompatActivity() {
@@ -46,6 +45,9 @@ class PlantActivity : AppCompatActivity() {
     private var soilMoisture = mutableListOf<Any>()
     private var lightIntensity = mutableListOf<Any>()
     private var inputTime = mutableListOf<String>()
+    private var inputTimestamp = mutableListOf<String>()
+
+    private lateinit var dateOfLastMeasurement: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,11 +85,18 @@ class PlantActivity : AppCompatActivity() {
 
         val data = hashMapOf(
                 "userId" to auth.currentUser!!.uid,
-                "plantId" to id
+                "plantId" to id,
+                "period" to 100
         )
-        this.getGraphData(data, aaChartModel, aaChartView)
+        this.getGraphData(data, aaChartModel, aaChartView, true)
         swipeRefreshLayout.setOnRefreshListener {
-            this.getGraphData(data, aaChartModel, aaChartView)
+            val newdata = hashMapOf(
+                    "userId" to auth.currentUser!!.uid,
+                    "plantId" to id,
+                    "lastDate" to dateOfLastMeasurement,
+                    "period" to 100
+            )
+            this.getGraphData(newdata, aaChartModel, aaChartView, false)
             swipeRefreshLayout.isRefreshing = false
         }
 
@@ -126,11 +135,12 @@ class PlantActivity : AppCompatActivity() {
         titleSoilMoisture = findViewById(R.id.titleSoilMoisture)
     }
 
-    private fun getLatestMeasurement(plantId: String) {
+    public fun getLatestMeasurement(plantId: String) {
         val data = hashMapOf(
                 "userId" to auth.currentUser!!.uid,
                 "plantId" to plantId,
-                "limit" to 1
+                "limit" to 1,
+                "period" to 100
         )
         functions
                 .getHttpsCallable("callableGetLastMeasurement")
@@ -173,11 +183,12 @@ class PlantActivity : AppCompatActivity() {
                 .call(data)
     }
 
-    private fun getGraphData(data: HashMap<String, String?>, aaChartModel: AAChartModel, aaChartView: AAChartView){
+    public fun getGraphData(data: HashMap<String, Any?>, aaChartModel: AAChartModel, aaChartView: AAChartView, init: Boolean = false){
         functions
                 .getHttpsCallable("callableGetLastMeasurement")
                 .call(data)
                 .continueWith { task ->
+
                     val result: ArrayList<HashMap<String, Any>> = task.result?.data as ArrayList<HashMap<String, Any>>
                     result.forEach { item ->
                         temperature.add(item["temperature"]!!)
@@ -197,9 +208,11 @@ class PlantActivity : AppCompatActivity() {
                         val date = sdf.format(netDate).toString()
 
                         inputTime.add(date)
+                        inputTimestamp.add(milliseconds.toString())
                     }
+                    dateOfLastMeasurement = inputTimestamp.last()
 
-                    aaChartModel.series(arrayOf(
+                    var elements = arrayOf(
                             AASeriesElement()
                                     .name("Temperatuur")
                                     .data(temperature.toTypedArray()),
@@ -210,13 +223,47 @@ class PlantActivity : AppCompatActivity() {
                                     .name("Licht")
                                     .data(lightIntensity.toTypedArray())
                     )
-                    )
+
+                    aaChartModel.series(elements)
 
                     aaChartModel.categories(inputTime.toTypedArray())
                     //The chart view object calls the instance object of AAChartModel and draws the final graphic
-                    aaChartView.aa_drawChartWithChartModel(aaChartModel)
+                    if(init){
+                        aaChartView.aa_drawChartWithChartModel(aaChartModel)
+                        val mainHandler = Handler(Looper.getMainLooper())
+                        val obj = MyRunnable(data, dateOfLastMeasurement, aaChartModel, aaChartView,this, mainHandler)
+                        mainHandler.post(obj)
+                    } else {
+                        aaChartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(elements)
+                    }
+
 
                     result
                 }
+    }
+}
+class MyRunnable: Runnable {
+    private lateinit var data: HashMap<String, Any?>
+    private lateinit var aaChartModel: AAChartModel
+    private lateinit var aaChartView: AAChartView
+    private lateinit var plantActivity: PlantActivity
+    private lateinit var mainHandler: Handler
+    private lateinit var dateOfLastMeasurement: String
+
+    constructor(data: HashMap<String, Any?>, dateOfLastMeasurement: String,aaChartModel: AAChartModel, aaChartView: AAChartView, plantActivity: PlantActivity, mainHandler: Handler) {
+        this.data = data
+        this.aaChartModel = aaChartModel
+        this.aaChartView = aaChartView
+        this.plantActivity = plantActivity
+        this.mainHandler = mainHandler
+        this.dateOfLastMeasurement = dateOfLastMeasurement
+
+        this.data.put("lastDate", this.dateOfLastMeasurement)
+    }
+
+    override fun run() {
+        plantActivity.getGraphData(data, aaChartModel, aaChartView, false)
+        plantActivity.getLatestMeasurement(data["plantId"] as String)
+        mainHandler.postDelayed(this, 5000);
     }
 }
