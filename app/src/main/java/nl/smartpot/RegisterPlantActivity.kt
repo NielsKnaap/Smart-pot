@@ -16,7 +16,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.FirebaseFunctionsException
-import java.util.*
+import kotlin.collections.HashMap
 
 
 class RegisterPlantActivity : AppCompatActivity() {
@@ -51,9 +51,26 @@ class RegisterPlantActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register_plant)
 
+        setTextVariables()
+
         val intent: Intent = getIntent();
         val id: String? = intent.getStringExtra("id")
+        System.out.println("ZIE DIT " + id)
 
+        if (id !== null) {
+            addPlantListener(id)
+            setRegistrySliders()
+
+            val data = hashMapOf<String, String>(
+                    "userId" to auth.currentUser!!.uid,
+                    "plantId" to id
+            )
+
+            getPlantFB(id, data)
+        }
+    }
+
+    private fun setTextVariables() {
         functions = FirebaseFunctions.getInstance()
         plantId = findViewById(R.id.plant_id)
         addPlantButton = findViewById(R.id.add_plant)
@@ -74,54 +91,12 @@ class RegisterPlantActivity : AppCompatActivity() {
         measurementFrequencyRange = findViewById(R.id.measureFrequencyBar)
         measurementFrequencyText = findViewById(R.id.measureFrequencyText)
 
-        addPlantButton.setOnClickListener {
-            var plantId: String = plantId.text.toString()
-            if (TextUtils.isEmpty(plantId)) {
-                Toast.makeText(this, "Please enter plantId", Toast.LENGTH_LONG).show()
-            } else {
-                if (auth.currentUser == null) {
-                    val intent = Intent(this, LoginActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                } else {
-                    // Plant id is entered
-                    val data = hashMapOf(
-                            "userId" to auth.currentUser!!.uid,
-                            "plantId" to plantId,
-                            "minLightIntensity" to lightRangeMinValue,
-                            "maxLightIntensity" to lightRangeMaxValue,
-                            "minSoilMoisture" to moistureRangeMinValue,
-                            "maxSoilMoisture" to moistureRangeMaxValue,
-                            "minTemperature" to tempRangeMinValue,
-                            "maxTemperature" to tempRangeMaxValue,
-                            "measureFrequency" to measurementFrequencyValue
-                    )
+        addPlantButton.setText("Update plant")
 
-                    var function = if (id !== null) "callableEditPlant" else "callableAddPlant"
+        Toast.makeText(this, "Edit mode", Toast.LENGTH_LONG).show()
+    }
 
-                    functions
-                            .getHttpsCallable(function)
-                            .call(data)
-                            .continueWith { task ->
-                                val result = task.result?.data as String
-                                result
-                            }
-                            .addOnCompleteListener(OnCompleteListener { task ->
-                                if (!task.isSuccessful) {
-                                    val e = task.exception
-                                    if (e is FirebaseFunctionsException) {
-                                        val code = e.code
-                                        val details = e.details
-                                        //TODO: Show user feedback
-                                    }
-                                }
-                                finish()
-                            })
-                }
-
-            }
-        }
-
+    private fun setRegistrySliders() {
         tempRange.setOnRangeSeekbarChangeListener(OnRangeSeekbarChangeListener { minValue, maxValue ->
             tempRangeMinValue = minValue
             tempRangeMaxValue = maxValue
@@ -147,51 +122,95 @@ class RegisterPlantActivity : AppCompatActivity() {
             measurementFrequencyText.setText(minValue.toString())
             measurementFrequencyValue = minValue
         })
+    }
 
-        if (id !== null) {
-            addPlantButton.setText("Update plant")
-            // Get the current values of the plant
-            Toast.makeText(this, "Edit mode", Toast.LENGTH_LONG).show()
-
-            val data = hashMapOf(
-                    "userId" to auth.currentUser!!.uid,
-                    "plantId" to id
-            )
-            functions
-                    .getHttpsCallable("callableGetPlant")
-                    .call(data)
-                    .continueWith { task ->
-                        val result: HashMap<String, Int> = task.result?.data as HashMap<String, Int>
-                        var maxTemperature = result["maxTemperature"]!!.toFloat()
-                        var minTemperature = result["minTemperature"]!!.toFloat()
-                        var maxSoilMoisture = result["maxSoilMoisture"]!!.toFloat()
-                        var minSoilMoisture = result["minSoilMoisture"]!!.toFloat()
-                        var minLightIntensity = result["minLightIntensity"]!!.toFloat()
-                        var maxLightIntensity = result["maxLightIntensity"]!!.toFloat()
-                        var measureFrequency = result["measureFrequency"]!!.toFloat()
-
-                        plantId.setText(id)
-                        plantId.isEnabled = false
-
-                        if(minSoilMoisture != 0.0F){
-                            moistureRange.setMinStartValue(minSoilMoisture).apply()
-                        }
-                        moistureRange.setMaxStartValue(maxSoilMoisture).apply()
-
-                        if(minTemperature != 0.0F){
-                            tempRange.setMinStartValue(minTemperature).apply()
-                        }
-                        tempRange.setMaxStartValue(maxTemperature).apply()
-
-                        if(minLightIntensity != 0.0F){
-                            lightRange.setMinStartValue(minLightIntensity).apply()
-                        }
-                        lightRange.setMaxStartValue(maxLightIntensity).apply()
-
-                        measurementFrequencyRange.setMinStartValue(measureFrequency).apply()
-
-                    }
+    private fun addPlantListener(id: String) {
+        addPlantButton.setOnClickListener {
+            var plantId: String = plantId.text.toString()
+            if (TextUtils.isEmpty(plantId)) {
+                Toast.makeText(this, "Please enter plantId", Toast.LENGTH_LONG).show()
+            } else {
+                if (auth.currentUser == null) {
+                    val intent = Intent(this, LoginActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                } else {
+                    val data = createPlantRegistryHashMap()
+                    registerPlantFB(id, data)
+                }
+            }
         }
+    }
 
+    private fun createPlantRegistryHashMap(): HashMap<String, Any> {
+        return hashMapOf(
+                "userId" to auth.currentUser!!.uid,
+                "plantId" to plantId,
+                "minLightIntensity" to lightRangeMinValue,
+                "maxLightIntensity" to lightRangeMaxValue,
+                "minSoilMoisture" to moistureRangeMinValue,
+                "maxSoilMoisture" to moistureRangeMaxValue,
+                "minTemperature" to tempRangeMinValue,
+                "maxTemperature" to tempRangeMaxValue,
+                "measureFrequency" to measurementFrequencyValue)
+    }
+
+    private fun registerPlantFB(id: String, data: HashMap<String, Any>) {
+        var function = if (id !== null) "callableEditPlant" else "callableAddPlant"
+
+        functions
+                .getHttpsCallable(function)
+                .call(data)
+                .continueWith { task ->
+                    val result = task.result?.data as String
+                    result
+                }
+                .addOnCompleteListener(OnCompleteListener { task ->
+                    if (!task.isSuccessful) {
+                        val e = task.exception
+                        if (e is FirebaseFunctionsException) {
+                            val code = e.code
+                            val details = e.details
+                        }
+                    }
+                    finish()
+                })
+    }
+
+    private fun getPlantFB(id: String, data: HashMap<String, String>) {
+        functions
+                .getHttpsCallable("callableGetPlant")
+                .call(data)
+                .continueWith { task ->
+                    val result: HashMap<String, Int> = task.result?.data as HashMap<String, Int>
+                    var maxTemperature = result["maxTemperature"]!!.toFloat()
+                    var minTemperature = result["minTemperature"]!!.toFloat()
+                    var maxSoilMoisture = result["maxSoilMoisture"]!!.toFloat()
+                    var minSoilMoisture = result["minSoilMoisture"]!!.toFloat()
+                    var minLightIntensity = result["minLightIntensity"]!!.toFloat()
+                    var maxLightIntensity = result["maxLightIntensity"]!!.toFloat()
+                    var measureFrequency = result["measureFrequency"]!!.toFloat()
+
+                    plantId.setText(id)
+                    plantId.isEnabled = false
+
+                    if(minSoilMoisture != 0.0F){
+                        moistureRange.setMinStartValue(minSoilMoisture).apply()
+                    }
+                    moistureRange.setMaxStartValue(maxSoilMoisture).apply()
+
+                    if(minTemperature != 0.0F){
+                        tempRange.setMinStartValue(minTemperature).apply()
+                    }
+                    tempRange.setMaxStartValue(maxTemperature).apply()
+
+                    if(minLightIntensity != 0.0F){
+                        lightRange.setMinStartValue(minLightIntensity).apply()
+                    }
+                    lightRange.setMaxStartValue(maxLightIntensity).apply()
+
+                    measurementFrequencyRange.setMinStartValue(measureFrequency).apply()
+
+                }
     }
 }
